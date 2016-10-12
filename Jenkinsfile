@@ -1,8 +1,8 @@
 node {
-  def project = 'REPLACE_WITH_YOUR_PROJECT_ID'
-  def appName = 'gceme'
+  def project = 'dockergm'
+  def appName = 'private-lab'
   def feSvcName = "${appName}-frontend"
-  def imageTag = "gcr.io/${project}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
+  def imageTag = "docker.io/${project}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
 
   checkout scm
 
@@ -13,7 +13,7 @@ node {
   sh("docker run ${imageTag} go test")
 
   stage 'Push image to registry'
-  sh("gcloud docker push ${imageTag}")
+  sh("docker push ${imageTag}")
 
   stage "Deploy Application"
   switch (env.BRANCH_NAME) {
@@ -21,9 +21,8 @@ node {
     case "staging":
         // Change deployed image in staging to the one we just built
         sh("sed -i.bak 's#gcr.io/cloud-solutions-images/gceme:1.0.0#${imageTag}#' ./k8s/staging/*.yaml")
-        sh("kubectl --namespace=production apply -f k8s/services/")
-        sh("kubectl --namespace=production apply -f k8s/staging/")
-        sh("echo http://`kubectl --namespace=production get service/${feSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${feSvcName}")
+        sh("kubectl --namespace=staging apply -f k8s/staging/")
+        sh("echo http://`kubectl --namespace=staging get service/${feSvcName} --output=json | jq -r '.spec.externalIPs[0]'` > ${feSvcName}")
         break
 
     // Roll out to production
