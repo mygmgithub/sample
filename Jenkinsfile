@@ -7,13 +7,13 @@ node {
   checkout scm
 
   stage 'Build image'
-  sh("docker build -t ${imageTag} .")
+  sh("sudo docker build -t ${imageTag} .")
 
   stage 'Run Go tests'
-  sh("docker run ${imageTag} go test")
+  sh("sudo docker run ${imageTag} go test")
 
   stage 'Push image to registry'
-  sh("docker push ${imageTag}")
+  sh("sudo docker push ${imageTag}")
 
   stage "Deploy Application"
   switch (env.BRANCH_NAME) {
