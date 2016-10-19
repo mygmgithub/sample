@@ -4,7 +4,8 @@ node {
   def feSvcName = "${appName}-frontend"
   def imageTag = "docker.io/${project}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
 
-  checkout scm
+  stage 'Checkout'
+  git url: 'https://github.com/mygmgithub/sample.git', branch: 'staging'
 
   stage 'Build image'
   sh("docker build -t ${imageTag} .")
