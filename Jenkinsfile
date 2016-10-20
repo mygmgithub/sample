@@ -1,4 +1,6 @@
 node {
+  def registry_url = "https://index.docker.io/v1/"
+  def docker_creds_id = "dockerhub-dockergm" 
   def project = 'dockergm'
   def appName = 'private-lab'
   def feSvcName = "${appName}-frontend"
@@ -13,7 +15,9 @@ node {
   sh("docker run ${imageTag} go test")
 
   stage 'Push image to registry'
-  sh("docker push ${imageTag}")
+  docker.withRegistry("${registry_url}", "${docker_creds_id}") {
+    sh("docker push ${imageTag}")
+  }  
 
   stage "Deploy Application"
   switch (env.BRANCH_NAME) {
