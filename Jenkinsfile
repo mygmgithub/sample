@@ -5,7 +5,7 @@ node {
   def imageTag = "docker.io/${project}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
 
   stage 'Checkout'
-  git url: 'https://github.com/mygmgithub/sample.git', branch: 'staging'
+  git clone --progress -o origin https://github.com/mygmgithub/sample.git
 
   stage 'Build image'
   sh("docker build -t ${imageTag} .")
