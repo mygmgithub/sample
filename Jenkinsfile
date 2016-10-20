@@ -7,7 +7,6 @@ node {
   checkout scm
 
   stage 'Build image'
-  sh("sudo systemctl status docker")
   sh("sudo docker build -t ${imageTag} .")
 
   stage 'Run Go tests'
