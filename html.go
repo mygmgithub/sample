@@ -36,7 +36,7 @@ const (
 
 <div class="card orange">
 <div class="card-content white-text">
-<div class="card-title">Backend that serviced this request</div>
+<div class="card-title">GM Backend that serviced this request</div>
 </div>
 <div class="card-content white">
 <table class="bordered">
@@ -80,7 +80,7 @@ const (
 
 <div class="card orange">
 <div class="card-content white-text">
-<div class="card-title">Proxy that handled this request</div>
+<div class="card-title">GM Proxy that handled this request</div>
 </div>
 <div class="card-content white">
 <table class="bordered">
