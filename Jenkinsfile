@@ -23,9 +23,10 @@ node {
     // Roll out to staging
     case "staging":
         // Change deployed image in staging to the one we just built
-        sh("sed -i.bak 's#gcr.io/cloud-solutions-images/gceme:1.0.0#${imageTag}#' ./k8s/staging/*.yaml")
+        sh("sed -i.bak 's#docker.io/dockergm/private-lab:staging.99#${imageTag}#' ./k8s/staging/*.yaml")
+        sh("cat ./k8s/staging/backend-staging-deployment.yaml")
         sh("kubectl --namespace=staging apply -f k8s/staging/")
-        sh("echo http://`kubectl --namespace=staging get service/${feSvcName} --output=json | jq -r '.spec.externalIPs[0]'` > ${feSvcName}")
+        sh("echo http://`kubectl --namespace=staging get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'` > ${feSvcName}")
         break
 
     // Roll out to production
