@@ -1,6 +1,5 @@
 node {
   def registry_url = "https://index.docker.io/v1/"
-  def docker_creds_id = "dockerhub-dockergm" 
   def project = 'dockergm'
   def appName = 'private-lab'
   def feSvcName = "${appName}-frontend"
@@ -10,12 +9,14 @@ node {
 
   stage 'Build image'
   sh("docker build -t ${imageTag} .")
-
+  
   stage 'Run Go tests'
   sh("docker run ${imageTag} go test")
 
-  stage 'Push image to registry'
-  sh("docker push ${imageTag}")
+  withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub-dockergm', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+	sh "docker login --password=${PASSWORD} --username=${USERNAME} ${registry_url}"
+	sh("docker push ${imageTag}")
+  }
 
 
   stage "Deploy Application"
@@ -23,10 +24,12 @@ node {
     // Roll out to staging
     case "staging":
         // Change deployed image in staging to the one we just built
-        sh("sed -i.bak 's#docker.io/dockergm/private-lab:staging.99#${imageTag}#' ./k8s/staging/*.yaml")
-        sh("cat ./k8s/staging/backend-staging-deployment.yaml")
-        sh("kubectl --namespace=staging apply -f k8s/staging/")
-        sh("echo http://`kubectl --namespace=staging get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'` > ${feSvcName}")
+        sh("sed -i.bak 's#docker.io/dockergm/private-lab:${env.BRANCH_NAME}.99#${imageTag}#' ./k8s/${env.BRANCH_NAME}/*.yaml")
+        sh("cat ./k8s/${env.BRANCH_NAME}/backend-${env.BRANCH_NAME}-deployment.yaml")
+        sh("kubectl --namespace=${env.BRANCH_NAME} apply -f k8s/${env.BRANCH_NAME}/")
+        sh("sleep 10")
+        sh("kubectl --namespace=${env.BRANCH_NAME} get pods")
+        sh("echo http://`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
         break
 
     // Roll out to production
