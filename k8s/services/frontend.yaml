@@ -21,8 +21,8 @@ spec:
   externalIPs: [172.16.78.201]
   ports:
   - name: http
-    port: 8082
-    targetPort: 8084
+    port: 8084
+    targetPort: 80
     protocol: TCP
   selector:
     app: gceme

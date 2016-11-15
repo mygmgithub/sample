@@ -40,8 +40,13 @@ node {
         sh("kubectl --namespace=production apply -f k8s/services/")
 	sh("sleep 10")
         sh("kubectl --namespace=production get pods")  
-        sh("echo http://`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
-        break
+	if (sh("kubectl get pods -l app=gceme --namespace=production -o jsonpath={.items[*].status.containerStatuses[0]} | grep -qi ready:false") != 0 ) {
+          sh("echo http://`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
+	}
+	else { 
+	  error("Build failed because of this and that..")
+	}  
+	break
 
     // Roll out a dev environment
     default:
