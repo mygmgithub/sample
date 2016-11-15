@@ -22,7 +22,7 @@ spec:
   ports:
   - name: http
     port: 8082
-    targetPort: 80
+    targetPort: 8084
     protocol: TCP
   selector:
     app: gceme
