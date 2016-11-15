@@ -35,7 +35,6 @@ node {
 	else { 
 	  error("Deployment failed")
 	}  
-        sh("echo http://`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
         break
 
     // Roll out to production
