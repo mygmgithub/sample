@@ -18,9 +18,10 @@ metadata:
   name: gceme-frontend
 spec:
   type: LoadBalancer
+  externalIPs: [172.16.78.201]
   ports:
   - name: http
-    port: 80
+    port: 8082
     targetPort: 80
     protocol: TCP
   selector:
