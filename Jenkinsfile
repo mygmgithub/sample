@@ -3,7 +3,7 @@ node {
   def project = 'dockergm'
   def appName = 'private-lab'
   def feSvcName = "${appName}-frontend"
-  def imageTag = "docker.io/${project}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
+  def imageTag = "docker.io/${project}/${appName}:sample-${env.BRANCH_NAME}.${env.BUILD_NUMBER}"
  
   checkout scm
 
@@ -35,7 +35,7 @@ node {
     // Roll out to production
     case "master":
         // Change deployed image in staging to the one we just built
-    	sh("sed -i.bak 's#docker.io/dockergm/private-lab:production.1.0.0#${imageTag}#' ./k8s/production/*.yaml")  
+    	sh("sed -i.bak 's#docker.io/dockergm/private-lab:${env.BRANCH_NAME}.3#${imageTag}#' ./k8s/production/*.yaml")  
         sh("kubectl --namespace=production apply -f k8s/production/")
         sh("kubectl --namespace=production apply -f k8s/services/")
 	sh("sleep 10")
