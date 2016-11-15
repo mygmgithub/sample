@@ -40,7 +40,7 @@ node {
         sh("kubectl --namespace=production apply -f k8s/services/")
 	sh("sleep 10")
         sh("kubectl --namespace=production get pods")  
-	if ( sh (script: "kubectl get pods -l app=gceme --namespace=production -o jsonpath={.items[*].status.containerStatuses[0]} | grep -qi ready:false") != 0 {
+	if ( sh (script: "kubectl get pods -l app=gceme --namespace=production -o jsonpath={.items[*].status.containerStatuses[0]} | grep -qi ready:false") != 0) {
           sh("echo http://`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
 	}
 	else { 
