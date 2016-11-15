@@ -35,10 +35,12 @@ node {
     // Roll out to production
     case "master":
         // Change deployed image in staging to the one we just built
-        sh("sed -i.bak 's#gcr.io/cloud-solutions-images/gceme:1.0.0#${imageTag}#' ./k8s/production/*.yaml")
-        sh("kubectl --namespace=production apply -f k8s/services/")
+    	sh("sed -i.bak 's#docker.io/dockergm/private-lab:production.1.0.0#${imageTag}#' ./k8s/production/*.yaml")  
         sh("kubectl --namespace=production apply -f k8s/production/")
-        sh("echo http://`kubectl --namespace=production get service/${feSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${feSvcName}")
+        sh("kubectl --namespace=production apply -f k8s/services/")
+	sh("sleep 10")
+        sh("kubectl --namespace=production get pods")  
+        sh("echo http://`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
         break
 
     // Roll out a dev environment
