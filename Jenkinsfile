@@ -27,24 +27,30 @@ node {
         sh("sed -i.bak 's#docker.io/dockergm/private-lab:${env.BRANCH_NAME}.99#${imageTag}#' ./k8s/${env.BRANCH_NAME}/*.yaml")
         sh("cat ./k8s/${env.BRANCH_NAME}/backend-${env.BRANCH_NAME}-deployment.yaml")
         sh("kubectl --namespace=${env.BRANCH_NAME} apply -f k8s/${env.BRANCH_NAME}/")
-        sh("sleep 10")
+        sh("sleep 30")
         sh("kubectl --namespace=${env.BRANCH_NAME} get pods")
+        if ( sh (script: "kubectl get pods -l app=gceme --namespace=${env.BRANCH_NAME} -o jsonpath={.items[*].status.containerStatuses[0]} | grep -qi ready:false", returnStatus: true) != 0) {
+          sh("echo http://`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
+	}
+	else { 
+	  error("Deployment failed")
+	}  
         sh("echo http://`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
         break
 
     // Roll out to production
     case "master":
         // Change deployed image in staging to the one we just built
-    	sh("sed -i.bak 's#docker.io/dockergm/private-lab:${env.BRANCH_NAME}.3#${imageTag}#' ./k8s/production/*.yaml")  
+    	sh("sed -i.bak 's#docker.io/dockergm/private-lab:${env.BRANCH_NAME}.1.0.1#${imageTag}#' ./k8s/production/*.yaml")  
         sh("kubectl --namespace=production apply -f k8s/production/")
         sh("kubectl --namespace=production apply -f k8s/services/")
-	sh("sleep 10")
+	sh("sleep 30")
         sh("kubectl --namespace=production get pods")  
-	if (sh("kubectl get pods -l app=gceme --namespace=production -o jsonpath={.items[*].status.containerStatuses[0]} | grep -qi ready:false") != 0 ) {
-          sh("echo http://`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=${env.BRANCH_NAME} get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
+	if ( sh (script: "kubectl get pods -l app=gceme --namespace=production -o jsonpath={.items[*].status.containerStatuses[0]} | grep -qi ready:false", returnStatus: true) != 0) {
+          sh("echo http://`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.externalIPs[0]'`:`kubectl --namespace=production get service/gceme-frontend --output=json | jq -r '.spec.ports[0].port'` > ${feSvcName}")
 	}
 	else { 
-	  error("Build failed because of this and that..")
+	  error("Deployment failed")
 	}  
 	break
 
