@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: gcr.io/cloud-solutions-images/gceme:1.0.0
+        image: docker.io/dockergm/private-lab:production.1.0.1
         resources:
           limits:
             memory: "500Mi"
